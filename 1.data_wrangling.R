@@ -2,7 +2,8 @@
 
 # Carregando arquivos ---------------------------------------------------------
 
-sales <- read_csv(file = "raw_data/train.csv")
+train <- read_csv(file = "raw_data/train.csv")
+test <- read_csv(file = "raw_data/test.csv")
 
 features <- read_csv(file = "raw_data/features.csv")
 
@@ -11,7 +12,8 @@ stores <- read_csv(file = "raw_data/stores.csv")
 
 # Wrangling -------------------------------------------------------------------
 
-summary(sales)
+summary(train)
+summary(test)
 summary(stores)
 summary(features)
 
@@ -38,32 +40,24 @@ features <- fastDummies::dummy_columns(.data = features,
 stores <- fastDummies::dummy_columns(.data = stores,
                                      select_columns = "Type",
                                      remove_selected_columns = TRUE,
-                                     remove_most_frequent_dummy = TRUE)
+                                     remove_most_frequent_dummy = FALSE)
 
 
 # Juntando as informações em um único tibble que será usado com os algo do ML
-sales_ml <- left_join(sales, stores, by = c("Store"))
-sales_ml <- left_join(sales_ml, features, by = c("Store","Date")) |> 
+train <- left_join(train, stores, by = c("Store"))
+train <- left_join(train, features, by = c("Store","Date")) |> 
   select(-IsHoliday)
 
 # Criando uma coluna ID
-sales_ml <- sales_ml |> 
+train <- train |> 
   mutate(id = paste0(Store, "_", Dept),
          .before = Store)
 
-# # Transformando as colunas em factor
-# sales_ml$id <- as.factor(sales_ml$id)
-# sales_ml$Store <- as.factor(sales_ml$Store)
-# sales_ml$Dept <- as.factor(sales_ml$Dept)
-# sales_ml$Type <- as.factor(sales_ml$Type)
-# sales_ml$dummy_IsHoliday <- as.factor(sales_ml$dummy_IsHoliday)
-
-str(sales_ml)
-summary(sales_ml)
+str(train)
+summary(train)
 
 # Salvando os dados tratados em um arquivo
-save(sales_ml, file = "tidy_data/sales_ml.RData")
-save(sales, file = "tidy_data/sales.RData")
+save(train, file = "tidy_data/train.RData")
 save(stores, file = "tidy_data/stores.RData")
 save(features, file = "tidy_data/features.RData")
 
